@@ -436,11 +436,12 @@ class SemiregularGrid(SemiregularGridInterface):
             -> List[Tuple[int, int, int]]:
         return self._filter_values(filter_function, self._rgba_values)
 
-    def _filter_values(self, filter_func: Union[Callable[[float], bool], Callable[[Tuple[float, float, float,float]],bool]],  # Callable[[Union[Tuple[float, float, float, float], float]], bool],
-                       values_dic: Union[Dict[Tuple[int, int, int],
-                                   Tuple[float, float, float, float]],
-                              Dict[Tuple[int, int, int], float]]) -> \
-                                List[Tuple[int, int, int]]:
+    def _filter_values(self, filter_func: Callable[..., bool],
+                       values_dic: Union[
+                           Dict[Tuple[int, int, int],
+                                Tuple[float, float, float, float]],
+                           Dict[Tuple[int, int, int], float]]) -> \
+            List[Tuple[int, int, int]]:
         """
         Filter cells based on their values by given 'filter function' and
         return a list of indices of those cells.

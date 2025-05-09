@@ -62,11 +62,7 @@ hexagonal_grid.delete_values(del_num=True, keep_indices=filtered_indices)
 matplotlib_visualisation(hexagonal_grid, figure_name="Filtered numerical values")
 
 
-
-
-
 # ggg = SemiregularGrid('3.3.3.4.4', 100)
-
 
 # ggg[(0, 0, 0)] = (0, 0, 1, 1)
 # ggg[(0, 0, 1)] = (0.5, 0.5, 0.5, 0.5)  #
