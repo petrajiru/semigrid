@@ -28,11 +28,11 @@ class Visualisation:
 
         self.show_index = False
         self.show_value = False
-        self.show_center = False
+        self.show_centre = False
         self.show_dual = False
 
         self.fig, self.ax = self._create_subplot(figure_name)
-        self.colors = ['black', 'blue', 'green']
+        self.colours = ['black', 'blue', 'green']
 
     def _get_grid_names(self) -> str:
         names_lst = [g.notation for g in self.grids]
@@ -42,18 +42,22 @@ class Visualisation:
         return ", ".join(names_lst)
 
     def _vis_edges(self, grid: SemiregularGrid) -> None:
-        """For a given grid, visualise its edges. Add them to the plot."""
+        """
+        For a given grid, visualise its edges. Add them to the plot.
+        """
         edges = grid.generate_edges((
             (self.xlim_now[0], self.ylim_now[0]),
             (self.xlim_now[1], self.ylim_now[1])))
         g_i = self.grids.index(grid)
-        line_collection = LineCollection(edges, colors=self.colors[g_i % len(
-            self.colors)], linewidths=1)
+        line_collection = LineCollection(edges, colors=self.colours[g_i % len(
+            self.colours)], linewidths=1)
         self.ax.add_collection(line_collection)
 
     def _vis_colored_polygons(self, grid: SemiregularGrid) -> None:
-        """For a given grid, visualise polygons that have a color assigned.
-        Add them to the plot."""
+        """
+        For a given grid, visualise polygons that have a colour assigned.
+        Add them to the plot.
+        """
         for index, rgba_value in grid._rgba_values.items():
             dgn = grid.generated_cells.get(index)
             if dgn is not None:
@@ -66,47 +70,57 @@ class Visualisation:
                                           alpha=rgba_value[-1]))
 
     def _vis_num_values(self, grid: SemiregularGrid) -> None:
-        """For a given grid, visualise numerical values of the cells.
-        Add them to the plot."""
+        """
+        For a given grid, visualise the numerical values of the cells.
+        Add them to the plot.
+        """
         for index, num_value in grid._num_values.items():
             x, y = grid.index_to_coords(index)
             self.ax.text(x, y, str(num_value), fontsize=6,
                          clip_on=True, ha='center', fontweight='bold')
 
     def _vis_indices(self, grid: SemiregularGrid) -> None:
-        """For a given grid, visualise indices of the cells.
-        Add them to the plot."""
+        """
+        For a given grid, visualise indices of the cells. Add them to the plot.
+        """
         grid_i = self.grids.index(grid)
         for ijk, dgn in grid.generated_cells.items():
             x, y = dgn.coords
             index = ijk if grid.notation not in ('4.4.4.4', '6.6.6') else \
                 ijk[:-1]
             self.ax.text(x, y, str(index), fontsize=7, ha='center',
-                         color=self.colors[grid_i % len(self.colors)],
+                         color=self.colours[grid_i % len(self.colours)],
                          clip_on=True)
 
-    def _vis_centers(self, grid: SemiregularGrid) -> None:
-        """For a given grid, visualise centers of the cells.
-        Add them to the plot."""
+    def _vis_centres(self, grid: SemiregularGrid) -> None:
+        """
+        For a given grid, visualise centres of the cells. Add them to the plot.
+        """
         grid_i = self.grids.index(grid)
         for dgn in grid.generated_cells.values():
             x, y = dgn.coords
-            self.ax.plot(x, y, marker='.', color=self.colors[grid_i % len(
-                self.colors)])
+            self.ax.plot(x, y, marker='.', color=self.colours[grid_i % len(
+                self.colours)])
 
     def _vis_dual(self, grid: SemiregularGrid) -> None:
+        """
+        For a given grid, visualise its dual grid.
+        """
         line_collection = LineCollection(grid._dual_graph, colors='red',
                                          linewidths=0.5)
         self.ax.add_collection(line_collection)
 
     def _for_each_grid(self, func: Callable[[SemiregularGrid], None]) -> None:
+        """
+        For each grid, apply the given visualisation function.
+        """
         for g in self.grids:
             func(g)
 
     def _visualise_grid(self) -> None:
         """
-        Visualise grid - with numerical values/cell indices/centers (if meant
-        to be shown) and with colored polygons (if they have color assigned).
+        Visualise grid - with numerical values/cell indices/centres (if meant
+        to be shown) and with coloured polygons (if they have colour assigned).
         """
         self.ax.set_xlim(self.xlim_now)
         self.ax.set_ylim(self.ylim_now)
@@ -118,8 +132,8 @@ class Visualisation:
 
             if self.show_dual:
                 self._vis_dual(grid)
-            if self.show_center:
-                self._vis_centers(grid)
+            if self.show_centre:
+                self._vis_centres(grid)
             if self.show_index:
                 self._vis_indices(grid)
             if self.show_value:
@@ -144,7 +158,7 @@ class Visualisation:
     def _on_key(self, event: Event) -> Any:
         if isinstance(event, KeyEvent):
             if event.key == 't':
-                self.show_center = not self.show_center
+                self.show_centre = not self.show_centre
             elif event.key == 'i':
                 self.show_index = not self.show_index
             elif event.key == 'n':
@@ -153,8 +167,8 @@ class Visualisation:
                 self.show_dual = not self.show_dual
 
             if event.key in ('t', 'i', 'n', 'r', 'd'):
-                if event.key == 't' and self.show_center:
-                    self._for_each_grid(self._vis_centers)
+                if event.key == 't' and self.show_centre:
+                    self._for_each_grid(self._vis_centres)
                 elif event.key == 'i' and self.show_index:
                     self._for_each_grid(self._vis_indices)
                 elif event.key == 'n' and self.show_value:
@@ -217,11 +231,13 @@ def matplotlib_visualisation(*grids: SemiregularGrid,
                                                Tuple[float, float]]
                              = ((-100, -75), (100, 75)),
                              figure_name: str = "") -> None:
-    """Visualise the grid interactively using matplotlib.
+    """
+    Visualise the grid interactively using matplotlib.
     Zoom in/out and move along the grid. Press keys for another functionality:
         * 'i' to show/hide the cell's indices
         * 'n' to show/hide the cell's numerical values
-        * 't' to show/hide the marked centers of the cells
+        * 't' to show/hide the points representing the centres of the cells
+        * 'd' to show/hide the dual graph of the grid
         * 'r' to reload the grid
     """
     min_xy, max_xy = area_range

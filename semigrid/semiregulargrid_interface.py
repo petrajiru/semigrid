@@ -20,12 +20,12 @@ class SemiregularGridInterface(ABC):
         pass
 
     @abstractmethod
-    def generate_centers(self, area_range: Tuple[Tuple[float, float],
+    def generate_centres(self, area_range: Tuple[Tuple[float, float],
                                                  Tuple[float, float]]) \
             -> List[Tuple[float, float]]:
         """
-        Generate a grid covering a rectangular area as a list of cell centers.
-        A cell center is the center of the polygon that the grid consists of
+        Generate a grid covering a rectangular area as a list of cell centres.
+        A cell centre is the centre of the polygon that the grid consists of
         (coordinates [x, y]).
 
         'Area range' is determined by two vertices - one at the bottom-left
@@ -72,23 +72,25 @@ class SemiregularGridInterface(ABC):
     def index_to_coords(self, index: Tuple[int, int, int]) \
             -> Tuple[float, float]:
         """
-        Convert 'index' of the cell into xy coordinates of the cell's center.
+        Convert the 'index' of the cell into xy coordinates of the cell's
+        centre.
         """
         pass
 
     @abstractmethod
     def coords_to_index(self, xy: Tuple[float, float]) -> Tuple[int, int, int]:
         """
-        Return (i, j, k) index of the cell that contains given 'xy' coordinates
+        Return (i, j, k) index of the cell that contains the given 'xy'
+        coordinates.
         """
         pass
 
     @abstractmethod
-    def center_coords_to_index(self, xy: Tuple[float, float],
+    def centre_coords_to_index(self, xy: Tuple[float, float],
                                rdgnt_name: Tuple[int, ...]) -> \
             Tuple[int, int, int]:
         """
-        Return (i, j, k) index of the cell which center coordinates are 'xy'
+        Return (i, j, k) index of the cell whose centre coordinates are 'xy'
         and it is of type 'rdgnt'.
         """
         pass
@@ -98,7 +100,7 @@ class SemiregularGridInterface(ABC):
             -> List[Tuple[float, float]]:
         """
         For a given cell with 'index' (i, j, k), get the coordinates
-        of the centers of the cell's adjacent polygons.
+        of the centres of the cell's adjacent polygons.
         """
         pass
 

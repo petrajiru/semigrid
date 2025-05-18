@@ -17,7 +17,7 @@ RDGNTName = Tuple[int, ...]
 def build_polygontype_dic(vertex_configuration: Tuple[int, ...]) \
         -> Dict[int, GridPolygon]:
     """
-    Build dictionary for better avaibility to the 'PolygonType' objects.
+    Build a dictionary for better avaibility of the 'GridPolygon' objects.
     """
     polygon_types = {}
     for n in vertex_configuration:
@@ -30,7 +30,8 @@ def build_polygontype_dic(vertex_configuration: Tuple[int, ...]) \
 def build_rdgnt_dic(rdgn_types_names: List[RDGNTName]) \
         -> Dict[RDGNTName, RotatedDualGraphNodeType]:
     """
-    Build dictionary for better avaibility to the 'RotatedDualGraphNodeType's.
+    Build a dictionary for better availability of the
+    'RotatedDualGraphNodeType's.
     """
     rdgnt_dic = {}
     for rdgnt_name in rdgn_types_names:
@@ -50,7 +51,7 @@ def build_precalculated_rdgnt_dic(rdgn_types_names: List[RDGNTName],
                                     Dict[RDGNTName, List[RDGNTName]]:
     """
     Precalculate in advance for each RotatedDualGridNodeType
-    the RotatedDualGridNodeType of theirs neighbours.
+    the RotatedDualGridNodeType of their neighbours.
     """
     rgnt_dic = build_rdgnt_dic(rdgn_types_names)
     neighbours_types = {}
@@ -86,15 +87,15 @@ def calculate_dgn_type(polygon_n: int,
     if len(possible_types) == 1:
         return possible_types[0]
 
-    # filter types that have 'polygon_n' in the center
+    # filter types that have 'polygon_n' in the centre
     types_starting_with_polygon = [possible_type for possible_type in
                                    possible_types if possible_type[0] ==
                                    polygon_n]
     if len(types_starting_with_polygon) == 1:
         return types_starting_with_polygon[0]
 
-    # filter types which polygon rotation corresponds with the polygon rotation
-    # of the neighbour calculated from the rdgnt
+    # filter types in which polygon rotation corresponds with the polygon
+    # rotation of the neighbour calculated from the rdgnt
     types_with_rotation = [possible_type
                            for possible_type in types_starting_with_polygon
                            if rdgnt_dic[possible_type].polygon_rotation ==
@@ -103,7 +104,7 @@ def calculate_dgn_type(polygon_n: int,
         return types_with_rotation[0]
 
     # filter types that have at certain angle type of rdgnt n polygon
-    # in the center
+    # in the centre
     alpha = math.radians(rdgnt_name[-1]) + \
         i * polygon_types[rdgnt_name[0]].central_angle
     beta = math.pi + alpha

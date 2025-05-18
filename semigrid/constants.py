@@ -1,22 +1,13 @@
 """
-Each grid (that is determined by vertex configuration) has
-several DualGridNodeType's that are variously rotated - RotatedDualGridNodeType
-DualGridNodeType is polygon in the middle with neigbour polygons around it
-- it is represented by their n types (e.g. 4 and 3, 6, 3, 6).
-Neighbours are in normalized cyclic order.
-
-RDGN_TYPES_IN_GRID is dictionary with 'vertex configuration' as keys
-and list of names of RotatedDualGridNodeTypes as values.
-
 (vertex configuration): [
     (n-gon, adjacent n-gon1, adjacent n-gon2,... rotation of DualGridNodeType),
     (n-gon, adjacent n-gon1, adjacent n-gon2,... rotation of DualGridNodeType),
     ...
     ]
 
-rotation = 0 means that the polar coordinate of the first neighbour's center is
-(r, 0)
-rotation is in degrees
+* rotation = 0 means that the polar coordinate of the first neighbour's
+    centre is (r, 0)
+* rotation is in degrees
 """
 from typing import Dict, Tuple, List
 import math

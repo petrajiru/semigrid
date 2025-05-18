@@ -85,6 +85,10 @@ class SemiregularGrid(SemiregularGridInterface):
         return self._grid_rotation
 
     @property
+    def total_cell_types(self) -> int:
+        return len(self._rdgnt_names)
+
+    @property
     def rgba_values(self) -> List[Tuple[Tuple[int, int, int],
                                         Tuple[float, float, float, float]]]:
         return [(index, value) for index, value in self._rgba_values.items()]
@@ -99,8 +103,10 @@ class SemiregularGrid(SemiregularGridInterface):
         return self._discovered_nodes
 
     def _calculate_origin_cells_range(self) -> AreaRange:
-        """Calculate the rectangular area around origin that will contain
-        the modulo unit vectors."""
+        """
+        Calculate the rectangular area around the origin that will contain
+        the modulo unit vectors.
+        """
         s1, s2 = self._unit_vectors
         vts = [s1, s2, (0, 0), (s1[0] + s2[0], s1[1] + s2[1])]
         min_x = min(vertex[0] for vertex in vts)
@@ -116,7 +122,7 @@ class SemiregularGrid(SemiregularGridInterface):
         near_origin_area = self._calculate_origin_cells_range()
 
         for i, j in [(i, j) for j in (-1, 0, 1) for i in (-1, 0, 1)]:
-            for k in range(len(self._rdgnt_names)):
+            for k in range(self.total_cell_types):
                 coords = self.index_to_coords((i, j, k))
                 rdgnt_name = self._rdgnt_names[k]
                 rdgnt = self._rdgnt_dic[rdgnt_name]
@@ -156,7 +162,7 @@ class SemiregularGrid(SemiregularGridInterface):
 
     def _rotate_vector(self, ux: float, uy: float) -> Tuple[float, float]:
         """
-        Rotate vector '(ux, uy)' around center by grid rotation and
+        Rotate vector '(ux, uy)' around centre by grid rotation and
         return its new coordinates.
         """
         cos_alpha = math.cos(self._grid_rotation)
@@ -169,7 +175,7 @@ class SemiregularGrid(SemiregularGridInterface):
     def _build_rdgnt_dic(self) \
             -> Dict[Tuple[int, ...], RotatedDualGraphNodeType]:
         """
-        Build dictionary for better availability
+        Build a dictionary for better availability
         to the 'RotatedDualGraphNodeType's.
         """
         rdgnt_dic = {}
@@ -188,21 +194,21 @@ class SemiregularGrid(SemiregularGridInterface):
         u, v = vector
         return [(x + u, y + v) for x, y in vertices]
 
-    def _adj_centers_coords(self, rdgnt_name: Tuple[int, ...],
+    def _adj_centres_coords(self, rdgnt_name: Tuple[int, ...],
                             coords: Tuple[float, float]) \
             -> List[Tuple[float, float]]:
         """
-        Get coordinates of the adjacents's centers (of the given polygon's
-        center 'coords').
+        Get coordinates of the adjacents' centres (of the given polygon's
+        centre 'coords').
         """
         rdgn = self._rdgnt_dic[rdgnt_name]
-        adj_centers_coords_origin = rdgn.adjacent_centers_coords
-        return self._move_vertices(coords, adj_centers_coords_origin)
+        adj_centres_coords_origin = rdgn.adjacent_centres_coords
+        return self._move_vertices(coords, adj_centres_coords_origin)
 
     def _polygon_coords_origin(self, polygon: GridPolygon, alpha: float) \
             -> List[Tuple[float, float]]:
         """
-        Return the vertices of a polygon that is rotated by 'alpha'. Center of
+        Return the vertices of a polygon that is rotated by 'alpha'. Centre of
         the polygon is at the origin.
         """
         initial_rotation = alpha + self._grid_rotation
@@ -211,11 +217,11 @@ class SemiregularGrid(SemiregularGridInterface):
                 for alpha in (polygon.central_angle * i + initial_rotation
                               for i in range(polygon.n))]
 
-    def _polygon_coords(self, center: Tuple[float, float], n: int,
+    def _polygon_coords(self, centre: Tuple[float, float], n: int,
                         rotation: float) -> List[Tuple[float, float]]:
         """
-        Get coordinates of polygon (list of vertices).
-        It takes a polygon's 'center' coordinates, its type 'n' and
+        Get the coordinates of a polygon (list of vertices).
+        It takes the polygon's 'centre' coordinates, its type 'n' and
         its 'rotation' in degrees.
         """
         polygon_coords_origin = self._polygons_coords.get((n, rotation))
@@ -224,12 +230,12 @@ class SemiregularGrid(SemiregularGridInterface):
                 GridPolygon(n, self._edge_size), math.radians(rotation))
             self._polygons_coords[(n, rotation)] = polygon_coords_origin
 
-        polygon_coords = self._move_vertices(center, polygon_coords_origin)
+        polygon_coords = self._move_vertices(centre, polygon_coords_origin)
         return [(round(x, 5), round(y, 5)) for x, y in polygon_coords]
 
     def _polygon_instersects_range(self, polygon: List[Tuple[float, float]],
                                    range: AreaRange) -> bool:
-        """Answer whether the polygen is intersecting the 'range'."""
+        """Answer whether the polygon is intersecting the 'range'."""
         range_min, range_max = range
         min_x = min(vertex[0] for vertex in polygon)
         min_y = min(vertex[1] for vertex in polygon)
@@ -245,37 +251,37 @@ class SemiregularGrid(SemiregularGridInterface):
         x, y = vertex
         return range[0][0] < x < range[1][0] and range[0][1] < y < range[1][1]
 
-    def _is_polygon_visible(self, center_coords: Tuple[float, float],
+    def _is_polygon_visible(self, centre_coords: Tuple[float, float],
                             rdgnt: RotatedDualGraphNodeType,
                             area_range: AreaRange) -> bool:
         """
-        Answer whether the polygon of 'rdgnt' type and center
-        having 'center_coords' is visible within the range.
+        Answer whether the polygon of 'rdgnt' type and centre
+        having 'centre_coords' is visible within the range.
         """
-        polygon_coords = self._polygon_coords(center_coords, rdgnt.polygon.n,
+        polygon_coords = self._polygon_coords(centre_coords, rdgnt.polygon.n,
                                               rdgnt.polygon_rotation)
 
         return self._polygon_instersects_range(polygon_coords, area_range)
 
-    def _get_edge(self, i: int, center_rdgnt: RotatedDualGraphNodeType,
+    def _get_edge(self, i: int, centre_rdgnt: RotatedDualGraphNodeType,
                   polygon_vertices: List[Tuple[float, float]]) \
             -> Tuple[Tuple[float, float], Tuple[float, float]]:
         """
-        Get coordinates of edge between polygon (of 'rdgnt' type) and its i-th
-        adjacent.
+        Get coordinates of the edge between the polygon (of 'rdgnt' type)
+        and its i-th adjacent.
         """
-        central_angle = math.degrees(center_rdgnt.polygon.central_angle)
-        index_a = int(i + center_rdgnt.dgnt_rotation//central_angle)
-        index_b = index_a - 1 if center_rdgnt.dgnt_rotation % \
-            central_angle < center_rdgnt.polygon_rotation else index_a + 1
+        central_angle = math.degrees(centre_rdgnt.polygon.central_angle)
+        index_a = int(i + centre_rdgnt.dgnt_rotation//central_angle)
+        index_b = index_a - 1 if centre_rdgnt.dgnt_rotation % \
+            central_angle < centre_rdgnt.polygon_rotation else index_a + 1
 
-        return polygon_vertices[index_b % center_rdgnt.polygon.n], \
-            polygon_vertices[index_a % center_rdgnt.polygon.n]
+        return polygon_vertices[index_b % centre_rdgnt.polygon.n], \
+            polygon_vertices[index_a % centre_rdgnt.polygon.n]
 
     def _get_adj_rdgnt(self, rdgnt_name: Tuple[int, ...], i: int) -> \
             RotatedDualGraphNodeType:
         """
-        Get for the cell (of 'rdgnt' type) the rdgnt of it's 'i-th' adjacent.
+        Get for the cell (of 'rdgnt' type) the rdgnt of its 'i-th' adjacent.
         """
         adj_rdgnt_name = self._adjacents_rdgnt[rdgnt_name][i]
         return self._rdgnt_dic[adj_rdgnt_name]
@@ -288,7 +294,7 @@ class SemiregularGrid(SemiregularGridInterface):
         If 'edges' is not None, the coordinates of edges discovered during the
         search will be stored.
         """
-        node_index = self.center_coords_to_index(node.coords, node.rdgnt_name)
+        node_index = self.centre_coords_to_index(node.coords, node.rdgnt_name)
         node_rdgnt = self._rdgnt_dic[node.rdgnt_name]
         if edges:
             polygon_vertices = self._polygon_coords(
@@ -296,7 +302,7 @@ class SemiregularGrid(SemiregularGridInterface):
 
         for i, adj_node_coords in enumerate(self.adjacents_coords(node_index)):
             self._dual_graph.append((node.coords, adj_node_coords))
-            adj_node_index = self.center_coords_to_index(
+            adj_node_index = self.centre_coords_to_index(
                 adj_node_coords, self._get_adj_rdgnt(
                     node.rdgnt_name, i).rdgnt_name)
             if adj_node_index in self._discovered_nodes:
@@ -326,7 +332,7 @@ class SemiregularGrid(SemiregularGridInterface):
     def _search_area(self, area_range: AreaRange, edges: bool = False) \
             -> None:
         """
-        Explore the centers of the polygons in the grid visible within
+        Explore the centres of the polygons in the grid visible within
         the given 'area_range' (= nodes) and store them by their indices.
         If 'edges' is not None, the coordinates of edges discovered during the
         search will be stored.
@@ -359,7 +365,7 @@ class SemiregularGrid(SemiregularGridInterface):
         self._search_area(area_range, edges=True)
         return self._edges
 
-    def generate_centers(self, area_range: AreaRange) -> \
+    def generate_centres(self, area_range: AreaRange) -> \
             List[Tuple[float, float]]:
         self._search_area(area_range)
         return [node.coords for node in self._discovered_nodes.values()]
@@ -395,7 +401,7 @@ class SemiregularGrid(SemiregularGridInterface):
         x_offset, y_offset = self._cells_offsets[rdgnt_name]
         return x + x_offset, y + y_offset
 
-    def center_coords_to_index(self, xy: Tuple[float, float],
+    def centre_coords_to_index(self, xy: Tuple[float, float],
                                rdgnt_name: Tuple[int, ...]) -> \
             Tuple[int, int, int]:
         if rdgnt_name not in self._rdgnt_names:
@@ -443,7 +449,7 @@ class SemiregularGrid(SemiregularGridInterface):
                            Dict[Tuple[int, int, int], float]]) -> \
             List[Tuple[int, int, int]]:
         """
-        Filter cells based on their values by given 'filter function' and
+        Filter cells based on their values by the given 'filter function' and
         return a list of indices of those cells.
         """
         filtered_values: Set[
@@ -455,7 +461,7 @@ class SemiregularGrid(SemiregularGridInterface):
     def adjacents_coords(self, index: Tuple[int, int, int]) \
             -> List[Tuple[float, float]]:
         rdgnt_name = self._rdgnt_names[index[2]]
-        adjacents_coords = self._adj_centers_coords(
+        adjacents_coords = self._adj_centres_coords(
             rdgnt_name, self.index_to_coords(index))
 
         return adjacents_coords

@@ -7,7 +7,7 @@ class GridPolygon:
     It stores the polygon characteristics:
     * n = number of sides
     * r = radius
-    * central_angle = the angle (in radians) formed at the center of a polygon
+    * central_angle = the angle (in radians) formed at the centre of a polygon
         by radii drawn to two adjacent vertices
     """
     def __init__(self, n: int, edge_size: int = 10) -> None:

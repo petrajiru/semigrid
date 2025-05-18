@@ -6,19 +6,19 @@ from semigrid.gridpolygon import GridPolygon
 
 class DualGraphNode:
     """
-    Class representing centers of the polygons (cells) that are tessellating
+    Class representing centres of the polygons that are tessellating
     the grid = nodes of the dual graph of the grid.
 
-    Each node (=center of the n-gon) has a coordinates, state and type.
+    Each node (=centre of the n-gon) has coordinates, a state and a type.
     """
 
     def __init__(self, coordinates: Tuple[float, float],
                  rdgnt_name: Tuple[int, ...]) -> None:
         """
-        * coordinates - coordinates of the center
+        * coordinates - coordinates of the centre
         * rdgnt_name - code representing the type of the node
                             -> RotatedDualGraphNodeType
-        * finished - is the search on this node finished
+        * fully_explored - is the search on this node finished
         """
         self._coords = coordinates
         self._rdgnt_name = rdgnt_name
@@ -60,10 +60,10 @@ class DualGraphNodeType:
 
 class RotatedDualGraphNodeType(DualGraphNodeType):
     """
-    Rotated DualGraphNodeTypes (DGNT = types of nodes in dual graph of the
+    Rotated DualGraphNodeTypes (DGNT = types of nodes in a dual graph of the
     grid) by a given angle in degrees.
 
-    Each type can be uniquely represented by a 'code' -> a tuple:
+    Each type can be uniquely represented by a tuple:
         (n of polygon in the middle, n of neighbour1, n of neighbour2,...,
                                 rotation in degrees of DualGraphNodeType).
     """
@@ -77,15 +77,15 @@ class RotatedDualGraphNodeType(DualGraphNodeType):
             n_polygon, neighbour_n_polygons, edge_size, grid_rotation)
         self.dgnt_rotation = dgnt_rotation  # in degrees
         self.rdgnt_name = (n_polygon, *neighbour_n_polygons, dgnt_rotation)
-        self.adjacent_centers_coords = self._adjacent_centers_coords()
+        self.adjacent_centres_coords = self._adjacent_centres_coords()
 
         # no grid rotation, just in 'constants_script.py'
         self.adjacents_n_rotations = self._calculate_adjacents_n_rotations()
         self.polygon_rotation = self._calculate_polygon_rotation()
 
-    def _adjacent_centers_coords(self) -> List[Tuple[float, float]]:
-        """Calculate the coordinates of the adjacent centers."""
-        adjacents_centers = []
+    def _adjacent_centres_coords(self) -> List[Tuple[float, float]]:
+        """Calculate the coordinates of the adjacent centres."""
+        adjacents_centres = []
         initial_rotation = math.radians(
             self.dgnt_rotation) + self.grid_rotation
 
@@ -96,13 +96,13 @@ class RotatedDualGraphNodeType(DualGraphNodeType):
             r = math.sqrt(self.polygon.r**2 -
                           (self.edge_size/2)**2) + math.sqrt(
                               adjacent.r**2 - (self.edge_size/2)**2)
-            adjacent_center = r * math.cos(alpha), r * math.sin(alpha)
-            adjacents_centers.append(adjacent_center)
+            adjacent_centre = r * math.cos(alpha), r * math.sin(alpha)
+            adjacents_centres.append(adjacent_centre)
 
-        return adjacents_centers
+        return adjacents_centres
 
     def _calculate_adjacents_n_rotations(self) -> List[float]:
-        """Calculate the polygon rotation of each adjacent"""
+        """Calculate the polygon rotation of each adjacent."""
         adjacents_rotations = []
         initial_rotation = math.radians(self.dgnt_rotation)
         for i in range(self.polygon.n):
@@ -116,7 +116,7 @@ class RotatedDualGraphNodeType(DualGraphNodeType):
         return adjacents_rotations
 
     def _calculate_polygon_rotation(self) -> float:
-        """Calculate the polygon rotation of the polygon in the middle"""
+        """Calculate the polygon rotation of the polygon in the middle."""
         # limited output {45, 22.5, 30,...}
         fraction = self.edge_size / (2 * self.polygon.r)  # == sin(math.pi/n)
         angle = (math.asin(fraction) + math.radians(self.dgnt_rotation)) \
