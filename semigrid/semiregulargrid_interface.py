@@ -96,11 +96,11 @@ class SemiregularGridInterface(ABC):
         pass
 
     @abstractmethod
-    def adjacents_coords(self, index: Tuple[int, int, int]) \
-            -> List[Tuple[float, float]]:
+    def adjacents(self, index: Tuple[int, int, int]) \
+            -> List[Tuple[int, int, int]]:
         """
-        For a given cell with 'index' (i, j, k), get the coordinates
-        of the centres of the cell's adjacent polygons.
+        For a given cell with 'index' (i, j, k), get the indices of the cell's
+        adjacents.
         """
         pass
 

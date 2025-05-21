@@ -65,6 +65,8 @@ class SemiregularGrid(SemiregularGridInterface):
             Tuple[int, int, int],
             ShapelyPolygon] = self._create_shapely_polygons()
 
+        self.adj_indices_shift = self._calculate_adj_indices_shift()
+
         # search
         self._search_counter: int = 0
         self._discovered_nodes: Dict[Tuple[int, int, int], DualGraphNode] = {}
@@ -187,6 +189,31 @@ class SemiregularGrid(SemiregularGridInterface):
 
         return rdgnt_dic
 
+    def _calculate_adj_indices_shift(self) -> Dict[Tuple[int, ...],
+                                                   List[Tuple[int, int]]]:
+        """
+        For each polygon of RotatedDualGraphNodeType, compute the 'i' and 'j'
+        index differences between the central polygon and each of its adjacent
+        polygons. E.g. the only rdgnt type in square grid will be
+        [(+1, 0), (0, +1), (-1, 0), (0, -1)].
+        """
+        # |     |0, +1|     |
+        # |-----|-----|-----|
+        # |-1, 0| ### |+1, 0|
+        # |-----|-----|-----|
+        # |     |0, -1|     |
+        adj_indices = {}
+        for k in range(self.total_cell_types):
+            xy = self.index_to_coords((0, 0, k))
+            rdgnt_name = self._rdgnt_names[k]
+            adj_coords = self._adj_centres_coords(rdgnt_name, xy)
+            adj_rdgnts = self._adjacents_rdgnt[rdgnt_name]
+            adj_indices[rdgnt_name] = [
+                self.centre_coords_to_index(adj_xy, adj_rdgnt)[:-1]
+                for adj_xy, adj_rdgnt in zip(adj_coords, adj_rdgnts)]
+
+        return adj_indices
+
     def _move_vertices(self, vector: Tuple[float, float],
                        vertices: List[Tuple[float, float]]) \
             -> List[Tuple[float, float]]:
@@ -294,40 +321,40 @@ class SemiregularGrid(SemiregularGridInterface):
         If 'edges' is not None, the coordinates of edges discovered during the
         search will be stored.
         """
-        node_index = self.centre_coords_to_index(node.coords, node.rdgnt_name)
+        node_ijk = self.centre_coords_to_index(node.coords, node.rdgnt_name)
         node_rdgnt = self._rdgnt_dic[node.rdgnt_name]
         if edges:
             polygon_vertices = self._polygon_coords(
                 node.coords, node.rdgnt_name[0], node_rdgnt.polygon_rotation)
 
-        for i, adj_node_coords in enumerate(self.adjacents_coords(node_index)):
-            self._dual_graph.append((node.coords, adj_node_coords))
-            adj_node_index = self.centre_coords_to_index(
-                adj_node_coords, self._get_adj_rdgnt(
-                    node.rdgnt_name, i).rdgnt_name)
-            if adj_node_index in self._discovered_nodes:
-                if edges and not self._discovered_nodes[adj_node_index
+        for i_, adj_node_ijk in enumerate(self.adjacents(node_ijk)):
+            adj_node_xy = self.index_to_coords(adj_node_ijk)
+
+            self._dual_graph.append((node.coords, adj_node_xy))
+
+            if adj_node_ijk in self._discovered_nodes:
+                if edges and not self._discovered_nodes[adj_node_ijk
                                                         ].is_fully_explored:
-                    self._edges.append(self._get_edge(i, node_rdgnt,
+                    self._edges.append(self._get_edge(i_, node_rdgnt,
                                                       polygon_vertices))
                 continue
 
-            adj_node_rdgnt = self._get_adj_rdgnt(node.rdgnt_name, i)
-            if not self._vertex_within_range(adj_node_coords, area_range):
-                if not self._is_polygon_visible(adj_node_coords,
-                                                adj_node_rdgnt, area_range):
+            adj_node_rdgnt = self._rdgnt_dic[self._rdgnt_names[adj_node_ijk[2]]
+                                             ]
+            if not self._vertex_within_range(adj_node_xy, area_range):
+                if not self._is_polygon_visible(adj_node_xy, adj_node_rdgnt,
+                                                area_range):
                     continue
 
-            new_node = DualGraphNode(adj_node_coords,
-                                     adj_node_rdgnt.rdgnt_name)
-            self._discovered_nodes[adj_node_index] = new_node
+            new_node = DualGraphNode(adj_node_xy, adj_node_rdgnt.rdgnt_name)
+            self._discovered_nodes[adj_node_ijk] = new_node
             queue.append(new_node)
 
             if edges:
-                self._edges.append(self._get_edge(i, node_rdgnt,
+                self._edges.append(self._get_edge(i_, node_rdgnt,
                                                   polygon_vertices))
 
-        self._discovered_nodes[node_index].mark_as_explored()
+        self._discovered_nodes[node_ijk].mark_as_explored()
 
     def _search_area(self, area_range: AreaRange, edges: bool = False) \
             -> None:
@@ -458,13 +485,13 @@ class SemiregularGrid(SemiregularGridInterface):
         return [index for index, value in values_dic.items()
                 if value in filtered_values]
 
-    def adjacents_coords(self, index: Tuple[int, int, int]) \
-            -> List[Tuple[float, float]]:
-        rdgnt_name = self._rdgnt_names[index[2]]
-        adjacents_coords = self._adj_centres_coords(
-            rdgnt_name, self.index_to_coords(index))
+    def adjacents(self, index: Tuple[int, int, int]) \
+            -> List[Tuple[int, int, int]]:
+        i, j, k = index
+        rdgnt_name = self._rdgnt_names[k]
+        adj_ij_shift = self.adj_indices_shift[rdgnt_name]
 
-        return adjacents_coords
+        return [(i + i_, j + j_, k) for i_, j_ in adj_ij_shift]
 
     def delete_values(self, del_rgba: bool = False,
                       del_num: bool = False,

@@ -81,10 +81,9 @@ grid5 = SemiregularGrid('3.12.12', edge_size=20)
 index = (1, 2, 0)
 grid5[index] = (0, 1, 0, 1)
 
-adjacents_coords = grid5.adjacents_coords(index)
+adjacents = grid5.adjacents(index)
 
-for adjacent_coords in adjacents_coords:
-    ijk = grid5.coords_to_index(adjacent_coords)
+for ijk in adjacents:
     grid5[ijk] = (0, 1, 0, 0.3)
 
 matplotlib_visualisation(grid5, area_range=((-300, -100), (250, 300)),
