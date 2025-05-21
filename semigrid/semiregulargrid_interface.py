@@ -109,8 +109,11 @@ class SemiregularGridInterface(ABC):
                       keep_indices: Optional[List[Tuple[int, int, int]]] =
                       None) -> None:
         """
-        Delete all rgba/numerical values in the grid (except for 'keep indices'
-        if specified). If an index with no rgba/numerical value is given,
-        it will be ignored.
+        Delete all assigned values in the grid.
+        If 'del_rgba' is True, RGBA values will be deleted.
+        If 'del_num' is True, numerical values will be deleted.
+
+        To preserve specific entries, provide their indices in 'keep_indices'
+        (their values will be excluded from deletion).
         """
         pass

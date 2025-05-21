@@ -7,7 +7,6 @@ import numpy as np
 from semigrid.semiregulargrid_interface import SemiregularGridInterface
 from semigrid.gridpolygon import GridPolygon
 from semigrid.dualgraphnode import DualGraphNode, RotatedDualGraphNodeType
-from semigrid.constants_generated import ADJACENTS_RDGNT
 from semigrid.constants import POSSIBLE_RDGNT, \
     UNIT_VECTORS, UNIT_BLOCK_CELLS_OFFSET
 
@@ -51,11 +50,6 @@ class SemiregularGrid(SemiregularGridInterface):
                                     List[Tuple[float, float]]] = {}
         # e.g. {(3, 3, 3, 3, 30): RotatedDualGraphNodeType}
         self._rdgnt_dic = self._build_rdgnt_dic()
-        # e.g. {(3, 3, 3, 3, 30): [(3, 3, 3, 3, 90),
-        #                          (3, 3, 3, 3, 90), (3, 3, 3, 3, 90)]}
-        self._adjacents_rdgnt: Dict[
-            Tuple[int, ...], List[Tuple[int, ...]]] = \
-            ADJACENTS_RDGNT[self._vertex_configuration]
 
         # conversion
         self._unit_vectors = self._calculate_unit_vectors()
@@ -190,7 +184,7 @@ class SemiregularGrid(SemiregularGridInterface):
         return rdgnt_dic
 
     def _calculate_adj_indices_shift(self) -> Dict[Tuple[int, ...],
-                                                   List[Tuple[int, int]]]:
+                                                   List[Tuple[int, int, int]]]:
         """
         For each polygon of RotatedDualGraphNodeType, compute the 'i' and 'j'
         index differences between the central polygon and each of its adjacent
@@ -207,10 +201,8 @@ class SemiregularGrid(SemiregularGridInterface):
             xy = self.index_to_coords((0, 0, k))
             rdgnt_name = self._rdgnt_names[k]
             adj_coords = self._adj_centres_coords(rdgnt_name, xy)
-            adj_rdgnts = self._adjacents_rdgnt[rdgnt_name]
             adj_indices[rdgnt_name] = [
-                self.centre_coords_to_index(adj_xy, adj_rdgnt)[:-1]
-                for adj_xy, adj_rdgnt in zip(adj_coords, adj_rdgnts)]
+                self.coords_to_index(adj_xy) for adj_xy in adj_coords]
 
         return adj_indices
 
@@ -304,14 +296,6 @@ class SemiregularGrid(SemiregularGridInterface):
 
         return polygon_vertices[index_b % centre_rdgnt.polygon.n], \
             polygon_vertices[index_a % centre_rdgnt.polygon.n]
-
-    def _get_adj_rdgnt(self, rdgnt_name: Tuple[int, ...], i: int) -> \
-            RotatedDualGraphNodeType:
-        """
-        Get for the cell (of 'rdgnt' type) the rdgnt of its 'i-th' adjacent.
-        """
-        adj_rdgnt_name = self._adjacents_rdgnt[rdgnt_name][i]
-        return self._rdgnt_dic[adj_rdgnt_name]
 
     def _search_adjacents(self, node: DualGraphNode,
                           queue: List[DualGraphNode], area_range: AreaRange,
@@ -489,9 +473,9 @@ class SemiregularGrid(SemiregularGridInterface):
             -> List[Tuple[int, int, int]]:
         i, j, k = index
         rdgnt_name = self._rdgnt_names[k]
-        adj_ij_shift = self.adj_indices_shift[rdgnt_name]
+        adj_ijk_shift = self.adj_indices_shift[rdgnt_name]
 
-        return [(i + i_, j + j_, k) for i_, j_ in adj_ij_shift]
+        return [(i + i_, j + j_, k_) for i_, j_, k_ in adj_ijk_shift]
 
     def delete_values(self, del_rgba: bool = False,
                       del_num: bool = False,
@@ -505,9 +489,8 @@ class SemiregularGrid(SemiregularGridInterface):
     def _delete_rgba_values(self, keep_indices: Optional[
             List[Tuple[int, int, int]]] = None) -> None:
         """
-        Delete all rgba values in the grid (except for 'keep indices'
-        if specified).
-        If an index with no rgba value is given, it will be ignored.
+        Delete all RGBA values in the grid
+        (any index included in 'keep_indices' will be excluded from deletion).
         """
         if keep_indices is None:
             self._rgba_values = {}
@@ -520,9 +503,8 @@ class SemiregularGrid(SemiregularGridInterface):
     def _delete_num_values(self, keep_indices: Optional[
             List[Tuple[int, int, int]]] = None) -> None:
         """
-        Delete all numerical values in the grid (except for 'keep indices'
-        if specified).
-        If an index with no numerical value is given, it will be ignored.
+        Delete all numerical values in the grid
+        (any index included in 'keep_indices' will be excluded from deletion).
         """
         if keep_indices is None:
             self._num_values = {}
