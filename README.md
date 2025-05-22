@@ -14,14 +14,9 @@ cd semigrid
 
 This library requires the following external Python packages:
 - numpy
-- shapely.geometry
+- shapely
 - matplotlib
-    - matplotlib.pyplot
-    - matplotlib.backend_bases
-    - matplotlib.patches
-    - matplotlib.collections
-    - matplotlib.figure
-    - matplotlib.axes
+
 
 You can install these dependencies using pip:
 ```
@@ -29,7 +24,7 @@ pip install numpy shapely matplotlib
 ```
 
 ## Example Usage
-This is the very basic example usage showing the creation of the grid, rgba and value assignment, and visualisation. Other functionalities are shown in `example_script.py`.
+This is a basic example demonstrating the creation of the grid, RGBA and numerical value assignment, and visualisation. Additional functionalities are illustrated in `example_script.py`.
 ```
 from semigrid import SemiregularGrid
 from semigrid import matplotlib_visualisation
@@ -46,16 +41,14 @@ matplotlib_visualisation(grid)
 ```
 semigrid/
 ├── __init__.py
-├── constants_generated.py
-├── constants_script.py
 ├── constants.py
 ├── dualgraphnode.py
 ├── gridpolygon.py
 ├── semiregulargrid_interface.py
 ├── semiregulargrid.py
 └── visualisation.py
-README.md
 example_script.py
+README.md
 ```
 
 ## Author
