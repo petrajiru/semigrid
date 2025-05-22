@@ -20,12 +20,12 @@ class SemiregularGridInterface(ABC):
         pass
 
     @abstractmethod
-    def generate_centers(self, area_range: Tuple[Tuple[float, float],
+    def generate_centres(self, area_range: Tuple[Tuple[float, float],
                                                  Tuple[float, float]]) \
             -> List[Tuple[float, float]]:
         """
-        Generate a grid covering a rectangular area as a list of cell centers.
-        A cell center is the center of the polygon that the grid consists of
+        Generate a grid covering a rectangular area as a list of cell centres.
+        A cell centre is the centre of the polygon that the grid consists of
         (coordinates [x, y]).
 
         'Area range' is determined by two vertices - one at the bottom-left
@@ -72,33 +72,35 @@ class SemiregularGridInterface(ABC):
     def index_to_coords(self, index: Tuple[int, int, int]) \
             -> Tuple[float, float]:
         """
-        Convert 'index' of the cell into xy coordinates of the cell's center.
+        Convert the 'index' of the cell into xy coordinates of the cell's
+        centre.
         """
         pass
 
     @abstractmethod
     def coords_to_index(self, xy: Tuple[float, float]) -> Tuple[int, int, int]:
         """
-        Return (i, j, k) index of the cell that contains given 'xy' coordinates
+        Return (i, j, k) index of the cell that contains the given 'xy'
+        coordinates.
         """
         pass
 
     @abstractmethod
-    def center_coords_to_index(self, xy: Tuple[float, float],
+    def centre_coords_to_index(self, xy: Tuple[float, float],
                                rdgnt_name: Tuple[int, ...]) -> \
             Tuple[int, int, int]:
         """
-        Return (i, j, k) index of the cell which center coordinates are 'xy'
+        Return (i, j, k) index of the cell whose centre coordinates are 'xy'
         and it is of type 'rdgnt'.
         """
         pass
 
     @abstractmethod
-    def adjacents_coords(self, index: Tuple[int, int, int]) \
-            -> List[Tuple[float, float]]:
+    def adjacents(self, index: Tuple[int, int, int]) \
+            -> List[Tuple[int, int, int]]:
         """
-        For a given cell with 'index' (i, j, k), get the coordinates
-        of the centers of the cell's adjacent polygons.
+        For a given cell with 'index' (i, j, k), get the indices of the cell's
+        adjacents.
         """
         pass
 
@@ -107,8 +109,11 @@ class SemiregularGridInterface(ABC):
                       keep_indices: Optional[List[Tuple[int, int, int]]] =
                       None) -> None:
         """
-        Delete all rgba/numerical values in the grid (except for 'keep indices'
-        if specified). If an index with no rgba/numerical value is given,
-        it will be ignored.
+        Delete all assigned values in the grid.
+        If 'del_rgba' is True, RGBA values will be deleted.
+        If 'del_num' is True, numerical values will be deleted.
+
+        To preserve specific entries, provide their indices in 'keep_indices'
+        (their values will be excluded from deletion).
         """
         pass
